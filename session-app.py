@@ -110,7 +110,23 @@ class Session(QWidget, Ui_Session):
         self.le_SessionName.setText(self.notify_path)
 
         self.bus = dbus.SystemBus()
-        self.reset()
+
+        try:
+            self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
+        except dbus.DBusException:
+            traceback.print_exc()
+            exit(1)
+
+    def connman_name_owner_changed(self, proxy):
+        try:
+            if proxy:
+                print "ConnMan appeared on D-Bus ", str(proxy)
+            else:
+                print "ConnMan disappeared on D-Bus"
+            self.reset()
+        except dbus.DBusException:
+            traceback.print_exc()
+            exit(1)
 
     def set_online(self, online):
         if online == "1":
