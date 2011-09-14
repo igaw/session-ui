@@ -194,10 +194,10 @@ class Session(QWidget, Ui_Session):
 
     def cb_destroy(self):
         try:
-            self.manager.DestroySession(self.session_path)
             self.notify.remove_from_connection(self.bus, self.notify_path)
-
             self.notify = None
+
+            self.manager.DestroySession(self.session_path)
         except dbus.DBusException, e:
             if e.get_dbus_name() in ['net.connman.Error.InvalidArguments']:
                 print e.get_dbus_message()
