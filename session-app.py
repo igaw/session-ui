@@ -15,8 +15,8 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-# Build Instration
-# pyuic4 session-app.ui > session-app_ui.py
+# Build Instruction
+# pyuic4 session.ui > session_ui.py
 
 import sys
 from session_ui import Ui_Session
