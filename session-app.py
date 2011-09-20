@@ -96,6 +96,9 @@ class Session(QWidget, Ui_Session):
         QWidget.__init__(self, parent)
         self.setupUi(self)
 
+        self.connect(self.pb_SessionEnable, SIGNAL('clicked()'), self.cb_sessionEnable)
+        self.connect(self.pb_SessionDisable, SIGNAL('clicked()'), self.cb_sessionDisable)
+
         self.connect(self.pb_Create, SIGNAL('clicked()'), self.cb_create)
         self.connect(self.pb_Destroy, SIGNAL('clicked()'), self.cb_destroy)
         self.connect(self.pb_Connect, SIGNAL('clicked()'), self.cb_connect)
@@ -110,6 +113,7 @@ class Session(QWidget, Ui_Session):
         self.le_SessionName.setText(self.notify_path)
 
         self.bus = dbus.SystemBus()
+        self.manager = None
 
         try:
             self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
@@ -121,7 +125,10 @@ class Session(QWidget, Ui_Session):
         try:
             if proxy:
                 print "ConnMan appeared on D-Bus ", str(proxy)
+                self.manager = dbus.Interface(self.bus.get_object("net.connman", "/"),
+                                              "net.connman.Manager")
             else:
+                self.manager = None
                 print "ConnMan disappeared on D-Bus"
             self.reset()
         except dbus.DBusException:
@@ -153,7 +160,6 @@ class Session(QWidget, Ui_Session):
 
     def reset(self):
         self.settings = {}
-        self.manager = None
         if self.notify:
             self.notify.remove_from_connection(self.bus, self.notify_path)
             self.notify = None
@@ -172,10 +178,20 @@ class Session(QWidget, Ui_Session):
         val = flag not in ['0']
         self.session.Change('EmergencyCall', dbus.Boolean(val))
 
+    def set_session_mode(self, enable):
+        try:
+            self.manager.SetProperty("SessionMode", enable)
+        except dbus.DBusException, e:
+            traceback.print_exc()
+
+    def cb_sessionEnable(self):
+        self.set_session_mode(True)
+
+    def cb_sessionDisable(self):
+        self.set_session_mode(False)
+
     def cb_create(self):
         try:
-            self.manager = dbus.Interface(self.bus.get_object("net.connman", "/"),
-                                          "net.connman.Manager")
             self.notify = Notification(self.bus, self.notify_path)
             self.notify.add_to_connection(self.bus, self.notify_path)
 
