@@ -45,14 +45,13 @@ def emitter(ob):
     return _emitterCache[ob]
 
 def extract_list(list):
-        val = "["
+        val = ""
         for i in list:
                 val += " " + str(i)
-        val += " ]"
-        return val
+        return val.strip()
 
 def extract_values(values):
-        val = "{"
+        val = ""
         for key in values.keys():
                 val += " " + key + "="
                 if key in ["PrefixLength"]:
@@ -62,8 +61,7 @@ def extract_values(values):
                                 val += extract_list(values[key])
                         else:
                                 val += str(values[key])
-        val += " }"
-        return val
+        return val.strip()
 
 class Notification(dbus.service.Object):
         def __init__(self, bus, notify_path):
