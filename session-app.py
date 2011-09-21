@@ -18,6 +18,7 @@
 # Build Instruction
 # pyuic4 session.ui > session_ui.py
 
+import signal
 import sys
 from session_ui import Ui_Session
 
@@ -35,6 +36,8 @@ dbus.mainloop.qt.DBusQtMainLoop(set_as_default=True)
 import weakref
 
 _emitterCache = weakref.WeakKeyDictionary()
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 def emitter(ob):
     if ob not in _emitterCache:
