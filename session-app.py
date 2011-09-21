@@ -124,6 +124,7 @@ class Session(QWidget, Ui_Session):
 
         self.bus = dbus.SystemBus()
         self.manager = None
+	self.session = None
 
         try:
             self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
@@ -173,44 +174,52 @@ class Session(QWidget, Ui_Session):
         if self.notify:
             self.notify.remove_from_connection(self.bus, self.notify_path)
             self.notify = None
+        if self.session:
+            self.session = None
 
         self.reset_fields()
+
+    def session_change(self, key, value):
+        if (self.session == None):
+            return
+
+        self.session.Change(key, value)
 
     def cb_Priority(self):
         flag = str(self.le_Priority.displayText())
         val = flag not in ['0']
-        self.session.Change('Priority', dbus.Boolean(val))
+	self.session_change('Priority', dbus.Boolean(val))
 
     def cb_AllowedBearers(self):
         val = str(self.le_AllowedBearers.displayText())
-        self.session.Change('AllowedBearers', val)
+        self.session_change('AllowedBearers', val)
 
     def cb_AvoidHandover(self):
         flag = str(self.le_AvoidHandover.displayText())
         val = flag not in ['0']
-        self.session.Change('AvoidHandover', dbus.Boolean(val))
+        self.session_change('AvoidHandover', dbus.Boolean(val))
 
     def cb_StayConnected(self):
         flag = str(self.le_StayConnected.displayText())
         val = flag not in ['0']
-        self.session.Change('StayConnected', dbus.Boolean(val))
+        self.session_change('StayConnected', dbus.Boolean(val))
 
     def cb_PeriodicConnnect(self):
         val = str(self.le_PeriodicConnect.displayText())
-        self.session.Change('PeriodicConnect', dbus.UInt32(val))
+        self.session_change('PeriodicConnect', dbus.UInt32(val))
 
     def cb_IdleTimeout(self):
         val = str(self.le_IdleTimeout.displayText())
-        self.session.Change('IdleTimeout', dbus.UInt32(val))
+        self.session_change('IdleTimeout', dbus.UInt32(val))
 
     def cb_EmergencyCall(self):
         flag = str(self.le_EmergencyCall.displayText())
         val = flag not in ['0']
-        self.session.Change('EmergencyCall', dbus.Boolean(val))
+        self.session_change('EmergencyCall', dbus.Boolean(val))
 
     def cb_RoamingPolicy(self):
         val = str(self.le_RoamingPolicy.displayText())
-        self.session.Change('RoamingPolicy', val)
+        self.session_change('RoamingPolicy', val)
 
     def cb_Release(self):
         self.reset()
