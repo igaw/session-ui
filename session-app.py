@@ -97,17 +97,26 @@ class Session(QWidget, Ui_Session):
         QWidget.__init__(self, parent)
         self.setupUi(self)
 
-        self.connect(self.pb_SessionEnable, SIGNAL('clicked()'), self.cb_sessionEnable)
-        self.connect(self.pb_SessionDisable, SIGNAL('clicked()'), self.cb_sessionDisable)
+        self.connect(self.pb_SessionEnable, SIGNAL('clicked()'), self.cb_SessionEnable)
+        self.connect(self.pb_SessionDisable, SIGNAL('clicked()'), self.cb_SessionDisable)
 
-        self.connect(self.pb_Create, SIGNAL('clicked()'), self.cb_create)
-        self.connect(self.pb_Destroy, SIGNAL('clicked()'), self.cb_destroy)
-        self.connect(self.pb_Connect, SIGNAL('clicked()'), self.cb_connect)
-        self.connect(self.pb_Disconnect, SIGNAL('clicked()'), self.cb_disconnect)
+        self.connect(self.pb_Create, SIGNAL('clicked()'), self.cb_Create)
+        self.connect(self.pb_Destroy, SIGNAL('clicked()'), self.cb_Destroy)
+        self.connect(self.pb_Connect, SIGNAL('clicked()'), self.cb_Connect)
+        self.connect(self.pb_Disconnect, SIGNAL('clicked()'), self.cb_Disconnect)
 
-        self.connect(self.pb_Quit, SIGNAL('clicked()'), self.cb_quit)
-        self.connect(self.le_SessionName, SIGNAL('editingFinished()'), self.cb_sessionName)
-        self.connect(self.le_EmergencyCall, SIGNAL('editingFinished()'), self.cb_emergencyCall)
+        self.connect(self.pb_Quit, SIGNAL('clicked()'), self.cb_Quit)
+
+        self.connect(self.le_SessionName, SIGNAL('editingFinished()'), self.cb_SessionName)
+
+        self.connect(self.le_Priority, SIGNAL('editingFinished()'), self.cb_Priority)
+        self.connect(self.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
+        self.connect(self.le_AvoidHandover, SIGNAL('editingFinished()'), self.cb_AvoidHandover)
+        self.connect(self.le_StayConnected, SIGNAL('editingFinished()'), self.cb_StayConnected)
+        self.connect(self.le_PeriodicConnect, SIGNAL('editingFinished()'), self.cb_PeriodicConnnect)
+        self.connect(self.le_IdleTimeout, SIGNAL('editingFinished()'), self.cb_IdleTimeout)
+        self.connect(self.le_EmergencyCall, SIGNAL('editingFinished()'), self.cb_EmergencyCall)
+        self.connect(self.le_RoamingPolicy, SIGNAL('editingFinished()'), self.cb_Priority)
 
         self.notify = None
         self.notify_path = "/foo"
@@ -167,17 +176,48 @@ class Session(QWidget, Ui_Session):
 
         self.reset_fields()
 
-    def cb_release(self):
-        self.reset()
+    def cb_Priority(self):
+        flag = str(self.le_Priority.displayText())
+        val = flag not in ['0']
+        self.session.Change('Priority', dbus.Boolean(val))
 
-    def cb_sessionName(self):
-        self.notify_path = str(self.le_SessionName.displayText())
-        print self.notify_path
+    def cb_AllowedBearers(self):
+        val = str(self.le_AllowedBearers.displayText())
+        self.session.Change('AllowedBearers', val)
 
-    def cb_emergencyCall(self):
+    def cb_AvoidHandover(self):
+        flag = str(self.le_AvoidHandover.displayText())
+        val = flag not in ['0']
+        self.session.Change('AvoidHandover', dbus.Boolean(val))
+
+    def cb_StayConnected(self):
+        flag = str(self.le_StayConnected.displayText())
+        val = flag not in ['0']
+        self.session.Change('StayConnected', dbus.Boolean(val))
+
+    def cb_PeriodicConnnect(self):
+        val = str(self.le_PeriodicConnect.displayText())
+        self.session.Change('PeriodicConnect', dbus.UInt32(val))
+
+    def cb_IdleTimeout(self):
+        val = str(self.le_IdleTimeout.displayText())
+        self.session.Change('IdleTimeout', dbus.UInt32(val))
+
+    def cb_EmergencyCall(self):
         flag = str(self.le_EmergencyCall.displayText())
         val = flag not in ['0']
         self.session.Change('EmergencyCall', dbus.Boolean(val))
+
+    def cb_RoamingPolicy(self):
+        val = str(self.le_RoamingPolicy.displayText())
+        self.session.Change('RoamingPolicy', val)
+
+    def cb_Release(self):
+        self.reset()
+
+    def cb_SessionName(self):
+        self.notify_path = str(self.le_SessionName.displayText())
+        print self.notify_path
 
     def set_session_mode(self, enable):
         try:
@@ -185,18 +225,18 @@ class Session(QWidget, Ui_Session):
         except dbus.DBusException, e:
             traceback.print_exc()
 
-    def cb_sessionEnable(self):
+    def cb_SessionEnable(self):
         self.set_session_mode(True)
 
-    def cb_sessionDisable(self):
+    def cb_SessionDisable(self):
         self.set_session_mode(False)
 
-    def cb_create(self):
+    def cb_Create(self):
         try:
             self.notify = Notification(self.bus, self.notify_path)
             self.notify.add_to_connection(self.bus, self.notify_path)
 
-            QObject.connect(emitter(self.notify), SIGNAL('Release'), self.cb_release)
+            QObject.connect(emitter(self.notify), SIGNAL('Release'), self.cb_Release)
 
             QObject.connect(emitter(self.notify), SIGNAL('AvoidHandover'), self.le_AvoidHandover.setText)
             QObject.connect(emitter(self.notify), SIGNAL('AllowedBearers'), self.le_AllowedBearers.setText)
@@ -225,7 +265,7 @@ class Session(QWidget, Ui_Session):
                 return
             traceback.print_exc()
 
-    def cb_destroy(self):
+    def cb_Destroy(self):
         try:
             self.notify.remove_from_connection(self.bus, self.notify_path)
             self.notify = None
@@ -239,7 +279,7 @@ class Session(QWidget, Ui_Session):
 
         self.reset_fields()
 
-    def cb_connect(self):
+    def cb_Connect(self):
         try:
             self.session.Connect()
         except dbus.DBusException, e:
@@ -248,7 +288,7 @@ class Session(QWidget, Ui_Session):
                 return
             traceback.print_exc()
 
-    def cb_disconnect(self):
+    def cb_Disconnect(self):
         try:
             self.session.Disconnect()
         except dbus.DBusException, e:
@@ -257,7 +297,7 @@ class Session(QWidget, Ui_Session):
                 return
             traceback.print_exc()
 
-    def cb_quit(self):
+    def cb_Quit(self):
         sys.exit()
 
 if __name__ == "__main__":
