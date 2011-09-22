@@ -157,6 +157,7 @@ class Session(QWidget, Ui_Session):
 			self.notify = None
 		if self.session:
 			self.session = None
+		self.reset_fields()
 
 	def session_change(self, key, value):
 		if (self.session == None):
