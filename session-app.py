@@ -20,6 +20,7 @@
 
 import signal
 import sys
+from functools import partial
 from session_ui import Ui_Session
 
 from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, Qt
@@ -33,16 +34,7 @@ import dbus.service
 import dbus.mainloop.qt
 dbus.mainloop.qt.DBusQtMainLoop(set_as_default=True)
 
-import weakref
-
-_emitterCache = weakref.WeakKeyDictionary()
-
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-def emitter(ob):
-	if ob not in _emitterCache:
-		_emitterCache[ob] = QObject()
-	return _emitterCache[ob]
 
 def extract_list(list):
 	val = ""
@@ -54,43 +46,32 @@ def extract_values(values):
 	val = ""
 	for key in values.keys():
 		val += " " + key + "="
-		if key in ["PrefixLength"]:
+		if key in [ "PrefixLength" ]:
 			val += "%s" % (int(values[key]))
 		else:
-			if key in ["Servers", "Excludes"]:
+			if key in [ "Servers", "Excludes" ]:
 				val += extract_list(values[key])
 			else:
 				val += str(values[key])
 	return val.strip()
 
 class Notification(dbus.service.Object):
-	def __init__(self, bus, notify_path):
+	def __init__(self, bus, notify_path, cb_settings, cb_release):
 		dbus.service.Object.__init__(self)
+		self.cb_settings = cb_settings
+		self.cb_release = cb_release
 
 	@dbus.service.method("net.connman.Notification",
 				in_signature='', out_signature='')
 	def Release(self):
 		print("Release")
-		QObject.emit(emitter(self), SIGNAL('Release'), '')
+		self.cb_release()
 
 	@dbus.service.method("net.connman.Notification",
 				in_signature='a{sv}', out_signature='')
 	def Update(self, settings):
 		print "Update called"
-
-		try:
-			for key in settings.keys():
-				if key in ["IPv4", "IPv6"]:
-					val = extract_values(settings[key])
-				elif key in  ["AllowedBearers" ]:
-					val = extract_list(settings[key])
-				else:
-					val = settings[key]
-				print "	   %s = %s" % (key, val)
-				QObject.emit(emitter(self), SIGNAL(key), str(val))
-		except:
-			print "Exception:"
-			traceback.print_exc()
+		self.cb_settings(settings)
 
 class Session(QWidget, Ui_Session):
 	def __init__(self, parent=None):
@@ -181,43 +162,33 @@ class Session(QWidget, Ui_Session):
 		if (self.session == None):
 			return
 
-		self.session.Change(key, value)
+		if self.settings[key] != value:
+			val = self.convert_type_to_dbus(key, value)
+			self.session.Change(key, val)
 
 	def cb_Priority(self):
-		flag = str(self.le_Priority.displayText())
-		val = flag not in ['0']
-		self.session_change('Priority', dbus.Boolean(val))
+		self.session_change('Priority', str(self.le_Priority.displayText()))
 
 	def cb_AllowedBearers(self):
-		val = str(self.le_AllowedBearers.displayText())
-		self.session_change('AllowedBearers', val)
+		self.session_change('AllowedBearers', str(self.le_AllowedBearers.displayText()))
 
 	def cb_AvoidHandover(self):
-		flag = str(self.le_AvoidHandover.displayText())
-		val = flag not in ['0']
-		self.session_change('AvoidHandover', dbus.Boolean(val))
+		self.session_change('AvoidHandover', str(self.le_AvoidHandover.displayText()))
 
 	def cb_StayConnected(self):
-		flag = str(self.le_StayConnected.displayText())
-		val = flag not in ['0']
-		self.session_change('StayConnected', dbus.Boolean(val))
+		self.session_change('StayConnected', str(self.le_StayConnected.displayText()))
 
 	def cb_PeriodicConnnect(self):
-		val = str(self.le_PeriodicConnect.displayText())
-		self.session_change('PeriodicConnect', dbus.UInt32(val))
+		self.session_change('PeriodicConnect', str(self.le_PeriodicConnect.displayText()))
 
 	def cb_IdleTimeout(self):
-		val = str(self.le_IdleTimeout.displayText())
-		self.session_change('IdleTimeout', dbus.UInt32(val))
+		self.session_change('IdleTimeout', str(self.le_IdleTimeout.displayText()))
 
 	def cb_EmergencyCall(self):
-		flag = str(self.le_EmergencyCall.displayText())
-		val = flag not in ['0']
-		self.session_change('EmergencyCall', dbus.Boolean(val))
+		self.session_change('EmergencyCall', str(self.le_EmergencyCall.displayText()))
 
 	def cb_RoamingPolicy(self):
-		val = str(self.le_RoamingPolicy.displayText())
-		self.session_change('RoamingPolicy', val)
+		self.session_change('RoamingPolicy', str(self.le_RoamingPolicy.displayText()))
 
 	def cb_Release(self):
 		self.reset()
@@ -238,28 +209,68 @@ class Session(QWidget, Ui_Session):
 	def cb_SessionDisable(self):
 		self.set_session_mode(False)
 
+	def convert_type_from_dbus(self, key, settings):
+		val = None
+
+		if key in [ "IPv4", "IPv6" ]:
+			val = extract_values(settings[key])
+		elif key in  [ "AllowedBearers" ]:
+			val = extract_list(settings[key])
+		elif key in [ "Priority", "AvoidHandover",
+			      "StayConnected", "EmergencyCall" ]:
+			val = bool(settings[key])
+			if val:
+				val = '1'
+			else:
+				val = '0'
+		elif key in [ "Online" ]:
+			val = bool(settings[key])
+			if val:
+				val = 'Online'
+			else:
+				val = 'Offline'
+		elif key in [ "PeriodicConnect", "IdleTimeout",
+			      "SessionMarker" ]:
+			val = int(settings[key])
+		else:
+			val = str(settings[key])
+
+		return val
+
+	def convert_type_to_dbus(self, key, value):
+		val = None
+
+		if key in  [ "AllowedBearers" ]:
+			val = dbus.Array(value.split(' '))
+		elif key in [ "Priority", "AvoidHandover",
+			      "StayConnected", "EmergencyCall" ]:
+			flag = str(value)
+			val = flag not in ['0']
+			val = dbus.Boolean(val)
+		elif key in [ "PeriodicConnect", "IdleTimeout" ]:
+			val = dbus.UInt32(value)
+
+		return val
+
+	def cb_updateSettings(self, settings):
+		try:
+			for key in settings.keys():
+				val = self.convert_type_from_dbus(key, settings)
+				print "	  %s = %s" % (key, val)
+
+				self.settings[key] = val
+
+				lineEdit = getattr(self, 'le_' + key)
+				lineEdit.setText(str(val))
+		except:
+			print "Exception:"
+			traceback.print_exc()
+
 	def cb_Create(self):
 		try:
-			self.notify = Notification(self.bus, self.notify_path)
+			self.notify = Notification(self.bus, self.notify_path,
+						   self.cb_updateSettings, self.cb_Release)
 			self.notify.add_to_connection(self.bus, self.notify_path)
-
-			QObject.connect(emitter(self.notify), SIGNAL('Release'), self.cb_Release)
-
-			QObject.connect(emitter(self.notify), SIGNAL('AvoidHandover'), self.le_AvoidHandover.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('AllowedBearers'), self.le_AllowedBearers.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('Bearer'), self.le_Bearer.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('EmergencyCall'), self.le_EmergencyCall.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('PeriodicConnect'), self.le_PeriodicConnect.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('StayConnected'), self.le_StayConnected.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('Online'), self.set_online)
-			QObject.connect(emitter(self.notify), SIGNAL('IdleTimeout'), self.le_IdleTimeout.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('SessionMarker'), self.le_SessionMarker.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('Priority'), self.le_Priority.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('IPv4'), self.le_IPv4.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('IPv6'), self.le_IPv6.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('Interface'), self.le_Interface.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('RoamingPolicy'), self.le_RoamingPolicy.setText)
-			QObject.connect(emitter(self.notify), SIGNAL('Name'), self.le_Name.setText)
 
 			self.session_path = self.manager.CreateSession(self.settings, self.notify_path)
 			print "Session Path: ", self.session_path
