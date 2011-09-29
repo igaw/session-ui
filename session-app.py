@@ -64,7 +64,7 @@ class Notification(dbus.service.Object):
 	@dbus.service.method("net.connman.Notification",
 				in_signature='', out_signature='')
 	def Release(self):
-		print("Release")
+		print "Release"
 		self.cb_release()
 
 	@dbus.service.method("net.connman.Notification",
