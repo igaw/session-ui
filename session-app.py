@@ -196,7 +196,6 @@ class Session(QWidget, Ui_Session):
 
 	def cb_SessionName(self):
 		self.notify_path = str(self.le_SessionName.displayText())
-		print self.notify_path
 
 	def set_session_mode(self, enable):
 		try:
