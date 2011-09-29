@@ -303,7 +303,7 @@ class Session(QWidget, Ui_Session):
 			if e.get_dbus_name() in ['net.connman.Error.Failed']:
 				print e.get_dbus_message()
 				return
-		traceback.print_exc()
+			traceback.print_exc()
 
 	def cb_Disconnect(self):
 		try:
