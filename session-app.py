@@ -90,6 +90,7 @@ class Session(QWidget, Ui_Session):
 
 		self.connect(self.le_SessionName, SIGNAL('editingFinished()'), self.cb_SessionName)
 
+		self.connect(self.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
 		self.connect(self.le_Priority, SIGNAL('editingFinished()'), self.cb_Priority)
 		self.connect(self.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
 		self.connect(self.le_AvoidHandover, SIGNAL('editingFinished()'), self.cb_AvoidHandover)
@@ -127,20 +128,15 @@ class Session(QWidget, Ui_Session):
 			traceback.print_exc()
 			exit(1)
 
-	def set_online(self, online):
-		if online == "1":
-			self.le_Online.setText("Online")
-		else:
-			self.le_Online.setText("Offline")
-
 	def reset_fields(self):
+		self.le_State.setText("")
 		self.le_AvoidHandover.setText("")
 		self.le_AllowedBearers.setText("")
 		self.le_Bearer.setText("")
 		self.le_EmergencyCall.setText("")
+		self.le_ConnectionType.setText("")
 		self.le_PeriodicConnect.setText("")
 		self.le_StayConnected.setText("")
-		self.set_online("")
 		self.le_IdleTimeout.setText("")
 		self.le_SessionMarker.setText("")
 		self.le_Priority.setText("")
@@ -166,6 +162,9 @@ class Session(QWidget, Ui_Session):
 		if self.settings[key] != value:
 			val = self.convert_type_to_dbus(key, value)
 			self.session.Change(key, val)
+
+	def cb_ConnectionType(self):
+		self.session_change('ConnectionType', str(self.le_ConnectionType.displayText()))
 
 	def cb_Priority(self):
 		self.session_change('Priority', str(self.le_Priority.displayText()))
@@ -223,12 +222,6 @@ class Session(QWidget, Ui_Session):
 				val = '1'
 			else:
 				val = '0'
-		elif key in [ "Online" ]:
-			val = bool(settings[key])
-			if val:
-				val = 'Online'
-			else:
-				val = 'Offline'
 		elif key in [ "PeriodicConnect", "IdleTimeout",
 			      "SessionMarker" ]:
 			val = int(settings[key])
