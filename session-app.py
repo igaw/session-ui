@@ -128,6 +128,12 @@ class Session(QWidget, Ui_Session):
 			traceback.print_exc()
 			exit(1)
 
+	def set_controls(self, enable):
+		self.pb_Create.setEnabled(not enable)
+		self.pb_Connect.setEnabled(enable)
+		self.pb_Disconnect.setEnabled(enable)
+		self.pb_Destroy.setEnabled(enable)
+
 	def reset_fields(self):
 		self.le_State.setText("")
 		self.le_AvoidHandover.setText("")
@@ -154,6 +160,8 @@ class Session(QWidget, Ui_Session):
 		if self.session:
 			self.session = None
 		self.reset_fields()
+
+		self.set_controls(False)
 
 	def session_change(self, key, value):
 		if (self.session == None):
@@ -270,6 +278,8 @@ class Session(QWidget, Ui_Session):
 
 			self.session = dbus.Interface(self.bus.get_object("net.connman", self.session_path),
 							"net.connman.Session")
+
+			self.set_controls(True)
 		except dbus.DBusException, e:
 			if e.get_dbus_name() in ['net.connman.Error.AlreadyExists']:
 				print e.get_dbus_message()
