@@ -243,7 +243,10 @@ class Session(QWidget, Ui_Session):
 		val = None
 
 		if key in  [ "AllowedBearers" ]:
-			val = dbus.Array(value.split(' '))
+			if value != None and len(value) > 0:
+				val = dbus.Array(value.split(' '))
+			else:
+				val = str("")
 		elif key in [ "Priority", "AvoidHandover",
 			      "StayConnected", "EmergencyCall" ]:
 			flag = str(value)
