@@ -164,12 +164,13 @@ class Session(QWidget, Ui_Session):
 		self.set_controls(False)
 
 	def session_change(self, key, value):
-		if (self.session == None):
-			return
-
-		if self.settings[key] != value:
+		if key not in self.settings:
+			self.settings[key] = self.convert_type_to_dbus(key, value)
+		elif self.settings[key] != value:
 			val = self.convert_type_to_dbus(key, value)
-			self.session.Change(key, val)
+
+			if (self.session != None):
+				self.session.Change(key, val)
 
 	def cb_ConnectionType(self):
 		self.session_change('ConnectionType', str(self.le_ConnectionType.displayText()))
@@ -249,7 +250,8 @@ class Session(QWidget, Ui_Session):
 			val = flag not in ['0']
 			val = dbus.Boolean(val)
 		elif key in [ "PeriodicConnect", "IdleTimeout" ]:
-			val = dbus.UInt32(value)
+			if value != None and len(value) > 0:
+				val = dbus.UInt32(value)
 
 		return val
 
