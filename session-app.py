@@ -134,11 +134,17 @@ class Session(QWidget, Ui_Session):
 		self.pb_Disconnect.setEnabled(enable)
 		self.pb_Destroy.setEnabled(enable)
 
+	def reset_connection_fields(self):
+		self.le_Name.setText("")
+		self.le_Bearer.setText("")
+		self.le_Interface.setText("")
+		self.le_IPv4.setText("")
+		self.le_IPv6.setText("")
+
 	def reset_fields(self):
 		self.le_State.setText("")
 		self.le_AvoidHandover.setText("")
 		self.le_AllowedBearers.setText("")
-		self.le_Bearer.setText("")
 		self.le_EmergencyCall.setText("")
 		self.le_ConnectionType.setText("")
 		self.le_PeriodicConnect.setText("")
@@ -146,11 +152,9 @@ class Session(QWidget, Ui_Session):
 		self.le_IdleTimeout.setText("")
 		self.le_SessionMarker.setText("")
 		self.le_Priority.setText("")
-		self.le_IPv4.setText("")
-		self.le_IPv6.setText("")
-		self.le_Interface.setText("")
 		self.le_RoamingPolicy.setText("")
-		self.le_Name.setText("")
+
+		self.reset_connection_fields()
 
 	def reset(self):
 		self.settings = {}
@@ -220,7 +224,11 @@ class Session(QWidget, Ui_Session):
 	def convert_type_from_dbus(self, key, settings):
 		val = None
 
-		if key in [ "IPv4", "IPv6" ]:
+		if key in [ "State" ]:
+			val = str(settings[key])
+			if val in [ "disconnected" ]:
+				self.reset_connection_fields()
+		elif key in [ "IPv4", "IPv6" ]:
 			val = extract_values(settings[key])
 		elif key in  [ "AllowedBearers" ]:
 			val = extract_list(settings[key])
