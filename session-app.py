@@ -263,6 +263,11 @@ class Session(QWidget, Ui_Session):
 		elif key in [ "PeriodicConnect", "IdleTimeout" ]:
 			if value != None and len(value) > 0:
 				val = dbus.UInt32(value)
+		elif key in [ "ConnectionType" ]:
+			if value != None and len(value) > 0:
+				val = str(value)
+			else:
+				val = str("")
 
 		return val
 
