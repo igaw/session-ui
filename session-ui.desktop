@@ -1,0 +1,6 @@
+[Desktop Entry]
+Version=0.1
+Name=session-ui
+Comment=Simple Python based UI for ConnMan Session API
+Exec=session-ui
+TargetEnvironment=Unity
