@@ -1,0 +1,19 @@
+Simple Python based UI for ConnMan Session API
+
+This UI is for debugging purposes. Do not look too closely how it is
+implemented. The author has no clue on UI programming.
+
+In order to run Imposter you need following dependencies resolved:
+
+   Python 2.x
+   PyQt 4.x
+
+* Running the application
+	cd src
+	python session-app.py
+
+* Generating source distribution package
+	python setup.py sdist
+
+* Generating RPM distribution package
+	python setup.py bdist_rpm
