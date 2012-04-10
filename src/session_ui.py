@@ -14,9 +14,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-# Build Instruction
-# pyuic4 session.ui > session_ui.py
-
+import os
 import signal
 import sys
 from functools import partial
@@ -41,7 +39,7 @@ def get_resource_path(filename):
 		return filename
 
 	return os.path.join(distutils.sysconfig.get_python_lib(),
-			    'session-ui', filename)
+			    'session_ui', filename)
 
 def extract_list(list):
 	val = ""
