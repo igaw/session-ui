@@ -19,8 +19,7 @@ import signal
 import sys
 from functools import partial
 
-from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, Qt, QUrl
-from PyQt4.QtGui import QApplication
+from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, Qt, QUrl, QCoreApplication
 from PyQt4.QtNetwork import QHttp
 
 import distutils.sysconfig
@@ -291,7 +290,7 @@ def main():
 		print "usage: %s <URL>" % (sys.argv[0])
 		return
 
-	app = QApplication(sys.argv)
+	app = QCoreApplication(sys.argv)
 	myapp = Session(sys.argv[1])
 	sys.exit(app.exec_())
 
