@@ -98,15 +98,9 @@ class Session(QWidget):
 
 		self.connect(self.ui.le_SessionName, SIGNAL('editingFinished()'), self.cb_SessionName)
 
-		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
-		self.connect(self.ui.le_Priority, SIGNAL('editingFinished()'), self.cb_Priority)
 		self.connect(self.ui.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
 		self.connect(self.ui.le_AvoidHandover, SIGNAL('editingFinished()'), self.cb_AvoidHandover)
-		self.connect(self.ui.le_StayConnected, SIGNAL('editingFinished()'), self.cb_StayConnected)
-		self.connect(self.ui.le_PeriodicConnect, SIGNAL('editingFinished()'), self.cb_PeriodicConnnect)
-		self.connect(self.ui.le_IdleTimeout, SIGNAL('editingFinished()'), self.cb_IdleTimeout)
-		self.connect(self.ui.le_EmergencyCall, SIGNAL('editingFinished()'), self.cb_EmergencyCall)
-		self.connect(self.ui.le_RoamingPolicy, SIGNAL('editingFinished()'), self.cb_Priority)
+		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
 
 		self.notify = None
 		self.notify_path = "/foo"
@@ -144,21 +138,14 @@ class Session(QWidget):
 
 	def reset_fields(self):
 		self.ui.le_State.setText("")
-		self.ui.le_AvoidHandover.setText("")
-		self.ui.le_AllowedBearers.setText("")
+		self.ui.le_Name.setText("")
 		self.ui.le_Bearer.setText("")
-		self.ui.le_EmergencyCall.setText("")
-		self.ui.le_ConnectionType.setText("")
-		self.ui.le_PeriodicConnect.setText("")
-		self.ui.le_StayConnected.setText("")
-		self.ui.le_IdleTimeout.setText("")
-		self.ui.le_SessionMarker.setText("")
-		self.ui.le_Priority.setText("")
+		self.ui.le_Interface.setText("")
 		self.ui.le_IPv4.setText("")
 		self.ui.le_IPv6.setText("")
-		self.ui.le_Interface.setText("")
-		self.ui.le_RoamingPolicy.setText("")
-		self.ui.le_Name.setText("")
+		self.ui.le_AllowedBearers.setText("")
+		self.ui.le_AvoidHandover.setText("")
+		self.ui.le_ConnectionType.setText("")
 
 	def reset(self):
 		self.settings = {}
@@ -180,32 +167,14 @@ class Session(QWidget):
 			if (self.session != None):
 				self.session.Change(key, val)
 
-	def cb_ConnectionType(self):
-		self.session_change('ConnectionType', str(self.ui.le_ConnectionType.displayText()))
-
-	def cb_Priority(self):
-		self.session_change('Priority', str(self.ui.le_Priority.displayText()))
-
 	def cb_AllowedBearers(self):
 		self.session_change('AllowedBearers', str(self.ui.le_AllowedBearers.displayText()))
 
 	def cb_AvoidHandover(self):
 		self.session_change('AvoidHandover', str(self.ui.le_AvoidHandover.displayText()))
 
-	def cb_StayConnected(self):
-		self.session_change('StayConnected', str(self.ui.le_StayConnected.displayText()))
-
-	def cb_PeriodicConnnect(self):
-		self.session_change('PeriodicConnect', str(self.ui.le_PeriodicConnect.displayText()))
-
-	def cb_IdleTimeout(self):
-		self.session_change('IdleTimeout', str(self.ui.le_IdleTimeout.displayText()))
-
-	def cb_EmergencyCall(self):
-		self.session_change('EmergencyCall', str(self.ui.le_EmergencyCall.displayText()))
-
-	def cb_RoamingPolicy(self):
-		self.session_change('RoamingPolicy', str(self.ui.le_RoamingPolicy.displayText()))
+	def cb_ConnectionType(self):
+		self.session_change('ConnectionType', str(self.ui.le_ConnectionType.displayText()))
 
 	def cb_Release(self):
 		self.reset()
@@ -232,16 +201,12 @@ class Session(QWidget):
 			val = extract_values(settings[key])
 		elif key in  [ "AllowedBearers" ]:
 			val = extract_list(settings[key])
-		elif key in [ "Priority", "AvoidHandover",
-			      "StayConnected", "EmergencyCall" ]:
+		elif key in [ "AvoidHandover" ]:
 			val = bool(settings[key])
 			if val:
 				val = '1'
 			else:
 				val = '0'
-		elif key in [ "PeriodicConnect", "IdleTimeout",
-			      "SessionMarker" ]:
-			val = int(settings[key])
 		else:
 			val = str(settings[key])
 
@@ -255,8 +220,7 @@ class Session(QWidget):
 				val = dbus.Array(value.split(' '))
 			else:
 				val = str("")
-		elif key in [ "Priority", "AvoidHandover",
-			      "StayConnected", "EmergencyCall" ]:
+		elif key in [ "AvoidHandover" ]:
 			flag = str(value)
 			val = flag not in ['0']
 			val = dbus.Boolean(val)

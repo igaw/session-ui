@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>366</width>
-    <height>622</height>
+    <width>344</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,29 +16,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="8" column="1">
-      <widget class="QLineEdit" name="le_ConnectionType"/>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_17">
-       <property name="text">
-        <string>ConnectionType</string>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="0">
-      <widget class="QLabel" name="label_14">
-       <property name="text">
-        <string>RoamingPoliciy</string>
-       </property>
-      </widget>
-     </item>
-     <item row="16" column="1">
-      <widget class="QLineEdit" name="le_RoamingPolicy"/>
-     </item>
-     <item row="10" column="1">
-      <widget class="QLineEdit" name="le_AllowedBearers"/>
-     </item>
      <item row="10" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -46,27 +23,7 @@
        </property>
       </widget>
      </item>
-     <item row="15" column="1">
-      <widget class="QLineEdit" name="le_EmergencyCall">
-       <property name="inputMask">
-        <string>B;0</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="31" column="0">
-      <widget class="QLabel" name="label_16">
-       <property name="text">
-        <string>Session Name</string>
-       </property>
-      </widget>
-     </item>
-     <item row="31" column="1">
-      <widget class="QLineEdit" name="le_SessionName"/>
-     </item>
-     <item row="3" column="1">
+     <item row="5" column="1">
       <widget class="QLineEdit" name="le_IPv4">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
@@ -76,21 +33,27 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>IPv4</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
+     <item row="6" column="0">
       <widget class="QLabel" name="label_12">
        <property name="text">
         <string>IPv6</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="26" column="1">
+      <widget class="QLineEdit" name="le_SessionName"/>
+     </item>
+     <item row="10" column="1">
+      <widget class="QLineEdit" name="le_AllowedBearers"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>IPv4</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
       <widget class="QLineEdit" name="le_IPv6">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
@@ -100,27 +63,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="26" column="0">
+      <widget class="QLabel" name="label_16">
        <property name="text">
-        <string>Bearer</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="le_Bearer">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>State</string>
+        <string>Session Name</string>
        </property>
       </widget>
      </item>
@@ -131,87 +77,6 @@
        </property>
        <property name="readOnly">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="le_State">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_15">
-       <property name="text">
-        <string>Name</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_9">
-       <property name="text">
-        <string>SessionMarker</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="le_SessionMarker">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_13">
-       <property name="text">
-        <string>InterfaceName</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLineEdit" name="le_Interface">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_10">
-       <property name="text">
-        <string>Priority</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QLineEdit" name="le_Priority">
-       <property name="inputMask">
-        <string>B;0</string>
        </property>
       </widget>
      </item>
@@ -229,49 +94,92 @@
        </property>
       </widget>
      </item>
-     <item row="12" column="0">
-      <widget class="QLabel" name="label_6">
+     <item row="13" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_13">
        <property name="text">
-        <string>StayConnected</string>
+        <string>InterfaceName</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="le_State">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>State</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="le_Interface">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="le_Bearer">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Bearer</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_17">
+       <property name="text">
+        <string>ConnectionType</string>
        </property>
       </widget>
      </item>
      <item row="12" column="1">
-      <widget class="QLineEdit" name="le_StayConnected">
-       <property name="inputMask">
-        <string>B;0</string>
-       </property>
-      </widget>
+      <widget class="QLineEdit" name="le_ConnectionType"/>
      </item>
-     <item row="13" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>PeriodicConnect</string>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="1">
-      <widget class="QLineEdit" name="le_PeriodicConnect"/>
-     </item>
-     <item row="14" column="0">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>IdleTimeout</string>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="1">
-      <widget class="QLineEdit" name="le_IdleTimeout"/>
-     </item>
-     <item row="15" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>EmergencyCall</string>
-       </property>
-      </widget>
-     </item>
-     <item row="18" column="1">
-      <spacer name="verticalSpacer">
+     <item row="8" column="1">
+      <spacer name="verticalSpacer_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -361,13 +269,8 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>le_Priority</tabstop>
   <tabstop>le_AllowedBearers</tabstop>
   <tabstop>le_AvoidHandover</tabstop>
-  <tabstop>le_StayConnected</tabstop>
-  <tabstop>le_PeriodicConnect</tabstop>
-  <tabstop>le_IdleTimeout</tabstop>
-  <tabstop>le_EmergencyCall</tabstop>
   <tabstop>le_SessionName</tabstop>
   <tabstop>pb_Create</tabstop>
   <tabstop>pb_Destroy</tabstop>
@@ -376,13 +279,8 @@
   <tabstop>pb_SessionEnable</tabstop>
   <tabstop>pb_SessionDisable</tabstop>
   <tabstop>pb_Quit</tabstop>
-  <tabstop>le_SessionMarker</tabstop>
-  <tabstop>le_Bearer</tabstop>
-  <tabstop>le_Name</tabstop>
-  <tabstop>le_State</tabstop>
   <tabstop>le_IPv4</tabstop>
   <tabstop>le_IPv6</tabstop>
-  <tabstop>le_Interface</tabstop>
  </tabstops>
  <resources/>
  <connections/>
