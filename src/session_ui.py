@@ -231,9 +231,6 @@ class Session(QWidget):
 			flag = str(value)
 			val = flag not in ['0']
 			val = dbus.Boolean(val)
-		elif key in [ "PeriodicConnect", "IdleTimeout" ]:
-			if value != None and len(value) > 0:
-				val = dbus.UInt32(value)
 		elif key in [ "ConnectionType" ]:
 			if value != None and len(value) > 0:
 				val = dbus.String(str(value))
