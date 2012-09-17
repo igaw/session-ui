@@ -266,6 +266,10 @@ class Session(QWidget):
 			if e.get_dbus_name() in ['net.connman.Error.AlreadyExists']:
 				print e.get_dbus_message()
 				return
+			if e.get_dbus_name() in ['net.connman.Error.InvalidArguments']:
+				self.notify.remove_from_connection(self.bus, self.notify_path)
+				print e.get_dbus_message()
+				return
 			traceback.print_exc()
 
 	def cb_Destroy(self):
