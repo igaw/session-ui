@@ -161,23 +161,27 @@ class Session(QWidget):
 
 		self.set_controls(False)
 
+	def session_change(self, key, value):
+		val = self.convert_type_to_dbus(key, value)
 
-	def session_change(self, key, value, sig_type):
 		if key not in self.settings:
-			self.settings[key] = self.convert_type_to_dbus(key, value, sig_type)
-		elif self.settings[key] != value:
-			val = self.convert_type_to_dbus(key, value, sig_type)
+			self.settings[key] = val
+		elif self.settings[key] != val:
+			self.settings[key] = val
 			if (self.session != None):
 				self.session.Change(key, val)
 
 	def cb_AllowedBearers(self):
-		self.session_change('AllowedBearers', str(self.ui.le_AllowedBearers.displayText()), 'a{sv}')
+		value = str(self.ui.le_AllowedBearers.displayText())
+		self.session_change('AllowedBearers', value)
 
 	def cb_AvoidHandover(self):
-		self.session_change('AvoidHandover', str(self.ui.le_AvoidHandover.displayText()), 'b')
+		value = str(self.ui.le_AvoidHandover.displayText())
+		self.session_change('AvoidHandover', value)
 
 	def cb_ConnectionType(self):
-		self.session_change('ConnectionType', str(self.ui.le_ConnectionType.displayText()), 's')
+		value = str(self.ui.le_ConnectionType.displayText())
+		self.session_change('ConnectionType', value)
 
 	def cb_Release(self):
 		self.reset()
@@ -215,14 +219,14 @@ class Session(QWidget):
 
 		return val
 
-	def convert_type_to_dbus(self, key, value, sig_type):
+	def convert_type_to_dbus(self, key, value):
 		val = None
-
 		if key in  [ "AllowedBearers" ]:
 			if value != None and len(value) > 0:
-				val = dbus.Array(value.split(' '), signature=sig_type)
+				val = dbus.Array(value.split(' '),
+						 signature='s')
 			else:
-				val = dbus.Array(signature=sig_type)
+				val = dbus.Array(signature='s')
 		elif key in [ "AvoidHandover" ]:
 			flag = str(value)
 			val = flag not in ['0']
