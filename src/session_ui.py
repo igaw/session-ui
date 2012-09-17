@@ -155,26 +155,29 @@ class Session(QWidget):
 		if self.session:
 			self.session = None
 		self.reset_fields()
+		self.cb_AllowedBearers()
+		self.cb_AvoidHandover()
+		self.cb_ConnectionType()
 
 		self.set_controls(False)
 
-	def session_change(self, key, value):
-		if key not in self.settings:
-			self.settings[key] = self.convert_type_to_dbus(key, value)
-		elif self.settings[key] != value:
-			val = self.convert_type_to_dbus(key, value)
 
+	def session_change(self, key, value, sig_type):
+		if key not in self.settings:
+			self.settings[key] = self.convert_type_to_dbus(key, value, sig_type)
+		elif self.settings[key] != value:
+			val = self.convert_type_to_dbus(key, value, sig_type)
 			if (self.session != None):
 				self.session.Change(key, val)
 
 	def cb_AllowedBearers(self):
-		self.session_change('AllowedBearers', str(self.ui.le_AllowedBearers.displayText()))
+		self.session_change('AllowedBearers', str(self.ui.le_AllowedBearers.displayText()), 'a{sv}')
 
 	def cb_AvoidHandover(self):
-		self.session_change('AvoidHandover', str(self.ui.le_AvoidHandover.displayText()))
+		self.session_change('AvoidHandover', str(self.ui.le_AvoidHandover.displayText()), 'b')
 
 	def cb_ConnectionType(self):
-		self.session_change('ConnectionType', str(self.ui.le_ConnectionType.displayText()))
+		self.session_change('ConnectionType', str(self.ui.le_ConnectionType.displayText()), 's')
 
 	def cb_Release(self):
 		self.reset()
@@ -212,14 +215,14 @@ class Session(QWidget):
 
 		return val
 
-	def convert_type_to_dbus(self, key, value):
+	def convert_type_to_dbus(self, key, value, sig_type):
 		val = None
 
 		if key in  [ "AllowedBearers" ]:
 			if value != None and len(value) > 0:
-				val = dbus.Array(value.split(' '))
+				val = dbus.Array(value.split(' '), signature=sig_type)
 			else:
-				val = str("")
+				val = dbus.Array(signature=sig_type)
 		elif key in [ "AvoidHandover" ]:
 			flag = str(value)
 			val = flag not in ['0']
@@ -229,9 +232,9 @@ class Session(QWidget):
 				val = dbus.UInt32(value)
 		elif key in [ "ConnectionType" ]:
 			if value != None and len(value) > 0:
-				val = str(value)
+				val = dbus.String(str(value))
 			else:
-				val = str("")
+				val = dbus.String('')
 
 		return val
 
