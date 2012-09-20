@@ -143,7 +143,7 @@ class Session(QWidget):
 		self.ui.le_Interface.setText("")
 		self.ui.le_IPv4.setText("")
 		self.ui.le_IPv6.setText("")
-		self.ui.le_AllowedBearers.setText("")
+		self.ui.le_AllowedBearers.setText("*")
 		self.ui.le_AvoidHandover.setText("")
 		self.ui.le_ConnectionType.setText("")
 
