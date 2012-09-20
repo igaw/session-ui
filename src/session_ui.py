@@ -99,7 +99,6 @@ class Session(QWidget):
 		self.connect(self.ui.le_SessionName, SIGNAL('editingFinished()'), self.cb_SessionName)
 
 		self.connect(self.ui.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
-		self.connect(self.ui.le_AvoidHandover, SIGNAL('editingFinished()'), self.cb_AvoidHandover)
 		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
 
 		self.notify = None
@@ -144,7 +143,6 @@ class Session(QWidget):
 		self.ui.le_IPv4.setText("")
 		self.ui.le_IPv6.setText("")
 		self.ui.le_AllowedBearers.setText("*")
-		self.ui.le_AvoidHandover.setText("")
 		self.ui.le_ConnectionType.setText("")
 
 	def reset(self):
@@ -156,7 +154,6 @@ class Session(QWidget):
 			self.session = None
 		self.reset_fields()
 		self.cb_AllowedBearers()
-		self.cb_AvoidHandover()
 		self.cb_ConnectionType()
 
 		self.set_controls(False)
@@ -174,10 +171,6 @@ class Session(QWidget):
 	def cb_AllowedBearers(self):
 		value = str(self.ui.le_AllowedBearers.displayText())
 		self.session_change('AllowedBearers', value)
-
-	def cb_AvoidHandover(self):
-		value = str(self.ui.le_AvoidHandover.displayText())
-		self.session_change('AvoidHandover', value)
 
 	def cb_ConnectionType(self):
 		value = str(self.ui.le_ConnectionType.displayText())
@@ -208,12 +201,6 @@ class Session(QWidget):
 			val = extract_values(settings[key])
 		elif key in  [ "AllowedBearers" ]:
 			val = extract_list(settings[key])
-		elif key in [ "AvoidHandover" ]:
-			val = bool(settings[key])
-			if val:
-				val = '1'
-			else:
-				val = '0'
 		else:
 			val = str(settings[key])
 
@@ -227,10 +214,6 @@ class Session(QWidget):
 						 signature='s')
 			else:
 				val = dbus.Array(signature='s')
-		elif key in [ "AvoidHandover" ]:
-			flag = str(value)
-			val = flag not in ['0']
-			val = dbus.Boolean(val)
 		elif key in [ "ConnectionType" ]:
 			if value != None and len(value) > 0:
 				val = dbus.String(str(value))
