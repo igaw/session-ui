@@ -17,6 +17,7 @@
 import os
 import signal
 import sys
+import selinux
 from functools import partial
 
 from PyQt4 import uic
@@ -180,7 +181,7 @@ class Session(QWidget):
 		self.reset()
 
 	def cb_SessionName(self):
-		self.notify_path = str(self.le_SessionName.displayText())
+		self.notify_path = str(self.ui.le_SessionName.displayText())
 
 	def set_session_mode(self, enable):
 		try:
