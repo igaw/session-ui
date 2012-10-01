@@ -1,0 +1,11 @@
+
+module session_ui 1.0;
+
+require {
+	type unconfined_t;
+	type sessionui_exec_t;
+	class file { read execute open };
+}
+
+#============= unconfined_t ==============
+allow unconfined_t sessionui_exec_t:file { read execute open };
