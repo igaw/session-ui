@@ -255,10 +255,13 @@ class Session(QWidget):
 				print e.get_dbus_message()
 				return
 			if e.get_dbus_name() in ['net.connman.Error.InvalidArguments']:
-				self.notify.remove_from_connection(self.bus, self.notify_path)
 				print e.get_dbus_message()
 				return
 			traceback.print_exc()
+		finally:
+			if self.notify:
+				self.notify.remove_from_connection(self.bus, self.notify_path)
+				self.notify = None
 
 	def cb_Destroy(self):
 		try:
