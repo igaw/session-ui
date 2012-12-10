@@ -296,6 +296,8 @@ class Session(QWidget):
 		sys.exit()
 
 def main():
+	print selinux.getcon()
+
 	app = QApplication(sys.argv)
 	myapp = Session()
 	myapp.show()
