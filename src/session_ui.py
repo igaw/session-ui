@@ -112,8 +112,8 @@ class Session(QWidget):
 
 		try:
 			self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
-		except dbus.DBusException:
-			traceback.print_exc()
+		except dbus.DBusException, e:
+			print e.get_dbus_message()
 			exit(1)
 
 	def connman_name_owner_changed(self, proxy):
@@ -126,8 +126,8 @@ class Session(QWidget):
 				self.manager = None
 				print "ConnMan disappeared on D-Bus"
 			self.reset()
-		except dbus.DBusException:
-			traceback.print_exc()
+		except dbus.DBusException, e:
+			print e.get_dbus_message()
 			exit(1)
 
 	def set_controls(self, enable):
@@ -149,7 +149,10 @@ class Session(QWidget):
 	def reset(self):
 		self.settings = {}
 		if self.notify:
-			self.notify.remove_from_connection(self.bus, self.notify_path)
+			try:
+				self.notify.remove_from_connection(self.bus, self.notify_path)
+			except:
+				pass
 			self.notify = None
 		if self.session:
 			self.session = None
@@ -187,7 +190,7 @@ class Session(QWidget):
 		try:
 			self.manager.SetProperty("SessionMode", enable)
 		except dbus.DBusException, e:
-			traceback.print_exc()
+			print e.get_dbus_message()
 
 	def cb_SessionEnable(self):
 		self.set_session_mode(True)
@@ -251,16 +254,15 @@ class Session(QWidget):
 
 			self.set_controls(True)
 		except dbus.DBusException, e:
+			print e.get_dbus_message()
+
 			if e.get_dbus_name() in ['net.connman.Error.AlreadyExists']:
-				print e.get_dbus_message()
 				return
-			if e.get_dbus_name() in ['net.connman.Error.InvalidArguments']:
-				print e.get_dbus_message()
+
 			if self.notify:
 				self.notify.remove_from_connection(self.bus, self.notify_path)
 				self.notify = None
 				return
-			traceback.print_exc()
 
 	def cb_Destroy(self):
 		try:
@@ -268,28 +270,19 @@ class Session(QWidget):
 
 			self.reset()
 		except dbus.DBusException, e:
-			if e.get_dbus_name() in ['net.connman.Error.InvalidArguments']:
-				print e.get_dbus_message()
-				return
-			traceback.print_exc()
+			print e.get_dbus_message()
 
 	def cb_Connect(self):
 		try:
 			self.session.Connect()
 		except dbus.DBusException, e:
-			if e.get_dbus_name() in ['net.connman.Error.Failed']:
-				print e.get_dbus_message()
-				return
-			traceback.print_exc()
+			print e.get_dbus_message()
 
 	def cb_Disconnect(self):
 		try:
 			self.session.Disconnect()
 		except dbus.DBusException, e:
-			if e.get_dbus_name() in ['net.connman.Error.Failed']:
-				print e.get_dbus_message()
-				return
-			traceback.print_exc()
+			print e.get_dbus_message()
 
 	def cb_Quit(self):
 		sys.exit()
