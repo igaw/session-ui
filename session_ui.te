@@ -1,11 +1,40 @@
+policy_module(session_ui,1.0.0)
 
-module session_ui 1.0;
+########################################
+#
+# Declarations
+#
 
-require {
-	type unconfined_t;
-	type sessionui_exec_t;
-	class file { read execute open };
-}
+type session_ui_t;
+domain_type(session_ui_t)
 
-#============= unconfined_t ==============
-allow unconfined_t sessionui_exec_t:file { read execute open };
+# Access to shared libraries
+libs_use_ld_so(session_ui_t)
+libs_use_shared_libs(session_ui_t)
+
+miscfiles_read_localization(session_ui_t)
+
+dev_read_urand(session_ui_t)
+
+# Type for the executable
+type session_ui_exec_t;
+files_type(session_ui_exec_t)
+domain_entry_file(session_ui_t, session_ui_exec_t)
+
+# Allow all TCP networking
+allow session_ui_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(session_ui_t)
+corenet_tcp_sendrecv_all_nodes(session_ui_t)
+corenet_tcp_sendrecv_all_ports(session_ui_t)
+corenet_all_recvfrom_unlabeled(session_ui_t)
+corenet_tcp_bind_all_nodes(session_ui_t)
+sysnet_read_config(session_ui_t)
+
+# Allow all UDP networking
+allow session_ui_t self:udp_socket create_socket_perms;
+corenet_udp_sendrecv_generic_if(session_ui_t)
+corenet_udp_sendrecv_all_nodes(session_ui_t)
+corenet_udp_sendrecv_all_ports(session_ui_t)
+corenet_all_recvfrom_unlabeled(session_ui_t)
+corenet_udp_bind_all_nodes(session_ui_t)
+sysnet_read_config(session_ui_t)
