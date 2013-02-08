@@ -61,6 +61,14 @@ def extract_values(values):
 				val += str(values[key])
 	return val.strip()
 
+class TrafficGenerator(QWidget):
+	def __init__(self, parent=None):
+		QWidget.__init__(self, parent)
+
+		ui_class, widget_class = uic.loadUiType(get_resource_path('ui/trafficgenerator.ui'))
+		self.ui = ui_class()
+		self.ui.setupUi(self)
+
 class Notification(dbus.service.Object):
 	def __init__(self, bus, notify_path, cb_settings, cb_release):
 		dbus.service.Object.__init__(self)
@@ -87,6 +95,8 @@ class Session(QWidget):
 		self.ui = ui_class()
 		self.ui.setupUi(self)
 
+		self.connect(self.ui.pb_TrafficGenerator, SIGNAL('clicked()'), self.cb_TrafficGenerator)
+
 		self.connect(self.ui.pb_SessionEnable, SIGNAL('clicked()'), self.cb_SessionEnable)
 		self.connect(self.ui.pb_SessionDisable, SIGNAL('clicked()'), self.cb_SessionDisable)
 
@@ -109,6 +119,7 @@ class Session(QWidget):
 		self.bus = dbus.SystemBus()
 		self.manager = None
 		self.session = None
+		self.traffic_generator = None
 
 		try:
 			self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
@@ -191,6 +202,13 @@ class Session(QWidget):
 			self.manager.SetProperty("SessionMode", enable)
 		except dbus.DBusException, e:
 			print e.get_dbus_message()
+
+	def cb_TrafficGenerator(self):
+		if self.traffic_generator:
+			self.traffic_generator = None
+		else:
+			self.traffic_generator = TrafficGenerator()
+			self.traffic_generator.show()
 
 	def cb_SessionEnable(self):
 		self.set_session_mode(True)
