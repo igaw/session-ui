@@ -21,8 +21,12 @@ import selinux
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, Qt
+from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, QThread
 from PyQt4.QtGui import *
+
+import PyQt4.Qwt5 as Qwt
+from PyQt4.Qwt5.anynumpy import *
+import time
 
 import distutils.sysconfig
 
@@ -61,6 +65,22 @@ def extract_values(values):
 				val += str(values[key])
 	return val.strip()
 
+class WorkerThread(QThread):
+	def __init__(self):
+		QThread.__init__(self)
+
+	def run(self):
+		phase = 0.0
+
+		while True:
+			self.emit(SIGNAL('update(float)'), phase)
+
+			if phase > pi - 0.0001:
+				phase = 0.0
+			phase += pi*0.02
+
+			time.sleep(0.03)
+
 class TrafficGenerator(QWidget):
 	def __init__(self, parent=None):
 		QWidget.__init__(self, parent)
@@ -68,6 +88,43 @@ class TrafficGenerator(QWidget):
 		ui_class, widget_class = uic.loadUiType(get_resource_path('ui/trafficgenerator.ui'))
 		self.ui = ui_class()
 		self.ui.setupUi(self)
+
+		self.worker = None
+
+		self.x = arange(0.0, 100.1, 0.5)
+		self.y = zeros(len(self.x), Float)
+		self.curve = Qwt.QwtPlotCurve("Some Data")
+		self.curve.attach(self.ui.qwtPlot)
+
+		self.connect(self.ui.pb_Start, SIGNAL('clicked()'), self.cb_Start)
+		self.connect(self.ui.pb_Stop, SIGNAL('clicked()'), self.cb_Stop)
+		self.connect(self.ui.pb_Close, SIGNAL('clicked()'), self.cb_Close)
+
+	def cb_Start(self):
+		if self.worker:
+			return
+
+		self.worker = WorkerThread()
+		self.connect(self.worker, SIGNAL('update(float)'), self.cb_update)
+		self.worker.start()
+
+	def cb_Stop(self):
+		if not self.worker:
+			return
+
+		self.worker.terminate()
+		self.worker = None
+
+	def cb_Close(self):
+		self.cb_Stop()
+		self.hide()
+
+	def cb_update(self, phase):
+		self.y = concatenate((self.y[1:], self.y[:1]), 1)
+		self.y[-1] = 0.8 - (2.0 * phase/pi) + 0.4*random.random()
+
+		self.curve.setData(self.x, self.y)
+		self.ui.qwtPlot.replot()
 
 class Notification(dbus.service.Object):
 	def __init__(self, bus, notify_path, cb_settings, cb_release):
@@ -112,6 +169,7 @@ class Session(QWidget):
 		self.connect(self.ui.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
 		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
 
+
 		self.notify = None
 		self.notify_path = "/foo"
 		self.ui.le_SessionName.setText(self.notify_path)
@@ -119,7 +177,7 @@ class Session(QWidget):
 		self.bus = dbus.SystemBus()
 		self.manager = None
 		self.session = None
-		self.traffic_generator = None
+		self.traffic_generator = TrafficGenerator()
 
 		try:
 			self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
@@ -204,10 +262,9 @@ class Session(QWidget):
 			print e.get_dbus_message()
 
 	def cb_TrafficGenerator(self):
-		if self.traffic_generator:
-			self.traffic_generator = None
+		if self.traffic_generator.isVisible():
+			self.traffic_generator.hide()
 		else:
-			self.traffic_generator = TrafficGenerator()
 			self.traffic_generator.show()
 
 	def cb_SessionEnable(self):
