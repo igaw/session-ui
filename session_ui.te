@@ -1,5 +1,9 @@
 policy_module(session_ui,1.0.0)
 
+require {
+	type unconfined_t;
+}
+
 ########################################
 #
 # Declarations
@@ -20,6 +24,8 @@ dev_read_urand(session_ui_t)
 type session_ui_exec_t;
 files_type(session_ui_exec_t)
 domain_entry_file(session_ui_t, session_ui_exec_t)
+
+domtrans_pattern(unconfined_t, session_ui_exec_t, session_ui_t)
 
 # Allow all TCP networking
 allow session_ui_t self:tcp_socket create_stream_socket_perms;
