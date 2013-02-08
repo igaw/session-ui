@@ -26,7 +26,7 @@ from PyQt4.QtGui import *
 
 import PyQt4.Qwt5 as Qwt
 from PyQt4.Qwt5.anynumpy import *
-import time
+import socket
 
 import distutils.sysconfig
 
@@ -70,16 +70,22 @@ class WorkerThread(QThread):
 		QThread.__init__(self)
 
 	def run(self):
-		phase = 0.0
+		HOST, PORT = "hotel311.server4you.de", 9999
+		data = 1000*"x"
+		upload = 0
+		download = 0
 
 		while True:
-			self.emit(SIGNAL('update(float)'), phase)
+			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			try:
+				upload += len(data)
+				sock.sendto(data + "\n", (HOST, PORT))
+				received = sock.recv(1024)
+				download += len(received)
+			finally:
+				sock.close()
 
-			if phase > pi - 0.0001:
-				phase = 0.0
-			phase += pi*0.02
-
-			time.sleep(0.03)
+			self.emit(SIGNAL('update(int, int)'), upload, download)
 
 class TrafficGenerator(QWidget):
 	def __init__(self, parent=None):
@@ -91,7 +97,7 @@ class TrafficGenerator(QWidget):
 
 		self.worker = None
 
-		self.x = arange(0.0, 100.1, 0.5)
+		self.x = arange(0, 100, 1)
 		self.y = zeros(len(self.x), Float)
 		self.curve = Qwt.QwtPlotCurve("Some Data")
 		self.curve.attach(self.ui.qwtPlot)
@@ -105,13 +111,19 @@ class TrafficGenerator(QWidget):
 			return
 
 		self.worker = WorkerThread()
-		self.connect(self.worker, SIGNAL('update(float)'), self.cb_update)
+		self.connect(self.worker, SIGNAL('update(int, int)'), self.cb_update)
 		self.worker.start()
+
+		self.timer = QTimer()
+		self.connect(self.timer, SIGNAL('timeout()'), self.cb_timeout)
+		self.timer.start(1000)
 
 	def cb_Stop(self):
 		if not self.worker:
 			return
 
+		self.timer.stop()
+		self.timer = None
 		self.worker.terminate()
 		self.worker = None
 
@@ -119,12 +131,16 @@ class TrafficGenerator(QWidget):
 		self.cb_Stop()
 		self.hide()
 
-	def cb_update(self, phase):
-		self.y = concatenate((self.y[1:], self.y[:1]), 1)
-		self.y[-1] = 0.8 - (2.0 * phase/pi) + 0.4*random.random()
+	def cb_update(self, upload, download):
+		print download
+		self.y[-1] += download
 
+	def cb_timeout(self):
 		self.curve.setData(self.x, self.y)
 		self.ui.qwtPlot.replot()
+
+		self.y = concatenate((self.y[1:], self.y[:1]), 1)
+		self.y[-1] = 0
 
 class Notification(dbus.service.Object):
 	def __init__(self, bus, notify_path, cb_settings, cb_release):
