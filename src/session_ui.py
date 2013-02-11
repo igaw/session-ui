@@ -27,6 +27,7 @@ from PyQt4.QtGui import *
 import PyQt4.Qwt5 as Qwt
 from PyQt4.Qwt5.anynumpy import *
 import socket
+import time
 
 import distutils.sysconfig
 
@@ -66,8 +67,9 @@ def extract_values(values):
 	return val.strip()
 
 class WorkerThread(QThread):
-	def __init__(self):
+	def __init__(self, sleep = 0.05):
 		QThread.__init__(self)
+		self.sleep = sleep
 
 	def run(self):
 		HOST, PORT = "hotel311.server4you.de", 9999
@@ -76,12 +78,17 @@ class WorkerThread(QThread):
 		download = 0
 
 		while True:
-			sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+			print self.sleep
+			time.sleep(self.sleep)
+
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			try:
-				upload += len(data)
-				sock.sendto(data + "\n", (HOST, PORT))
+				upload = len(data)
+				sock.connect((HOST, PORT))
+				sock.sendall(data + "\n")
+
 				received = sock.recv(1024)
-				download += len(received)
+				download = len(received)
 			finally:
 				sock.close()
 
@@ -97,20 +104,30 @@ class TrafficGenerator(QWidget):
 
 		self.worker = None
 
-		self.x = arange(0, 100, 1)
-		self.y = zeros(len(self.x), Float)
+		self.x = arange(0, 30, 1)
+		self.y = zeros(len(self.x))
 		self.curve = Qwt.QwtPlotCurve("Some Data")
 		self.curve.attach(self.ui.qwtPlot)
+
+		self.ui.qwtPlot.setAxisTitle(Qwt.QwtPlot.xBottom, "Time (seconds)")
+		self.ui.qwtPlot.setAxisTitle(Qwt.QwtPlot.yLeft, "Bytes")
+
+		self.ui.slider.setRange(0, 1000, 10)
+		self.ui.slider.setValue(50)
 
 		self.connect(self.ui.pb_Start, SIGNAL('clicked()'), self.cb_Start)
 		self.connect(self.ui.pb_Stop, SIGNAL('clicked()'), self.cb_Stop)
 		self.connect(self.ui.pb_Close, SIGNAL('clicked()'), self.cb_Close)
+		self.connect(self.ui.slider, SIGNAL('sliderMoved(double)'), self.cb_sleep)
 
 	def cb_Start(self):
 		if self.worker:
 			return
 
-		self.worker = WorkerThread()
+		sleep = 0
+		if self.ui.slider.value():
+			sleep = self.ui.slider.value()/1000.0
+		self.worker = WorkerThread(sleep)
 		self.connect(self.worker, SIGNAL('update(int, int)'), self.cb_update)
 		self.worker.start()
 
@@ -131,8 +148,16 @@ class TrafficGenerator(QWidget):
 		self.cb_Stop()
 		self.hide()
 
+	def cb_sleep(self, value):
+		if not self.worker:
+			return
+		if value == 0:
+			self.worker.sleep = 0
+		else:
+			self.worker.sleep = value/1000.0
+
+
 	def cb_update(self, upload, download):
-		print download
 		self.y[-1] += download
 
 	def cb_timeout(self):

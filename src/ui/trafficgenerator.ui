@@ -20,20 +20,24 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QwtSlider" name="Slider"/>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Sleep</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QwtSlider" name="slider">
+       <property name="valid">
+        <bool>true</bool>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <property name="mass">
+        <double>0.000000000000000</double>
        </property>
-      </spacer>
+       <property name="scalePosition">
+        <enum>QwtSlider::BottomScale</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pb_Start">
