@@ -67,12 +67,13 @@ def extract_values(values):
 	return val.strip()
 
 class WorkerThread(QThread):
-	def __init__(self, sleep = 0.05):
+	def __init__(self, server, sleep = 0.05):
 		QThread.__init__(self)
+		self.server = server
 		self.sleep = sleep
 
 	def run(self):
-		HOST, PORT = "hotel311.server4you.de", 9999
+		HOST, PORT = self.server, 9999
 		data = 1000*"x"
 		upload = 0
 		download = 0
@@ -115,10 +116,18 @@ class TrafficGenerator(QWidget):
 		self.ui.slider.setRange(0, 1000, 10)
 		self.ui.slider.setValue(50)
 
+		self.connect(self.ui.le_Server, SIGNAL('editingFinished()'), self.cb_Server)
 		self.connect(self.ui.pb_Start, SIGNAL('clicked()'), self.cb_Start)
 		self.connect(self.ui.pb_Stop, SIGNAL('clicked()'), self.cb_Stop)
 		self.connect(self.ui.pb_Close, SIGNAL('clicked()'), self.cb_Close)
 		self.connect(self.ui.slider, SIGNAL('sliderMoved(double)'), self.cb_sleep)
+
+	def cb_Server(self):
+		if not self.worker:
+			return
+
+		self.cb_Stop()
+		self.cb_Start()
 
 	def cb_Start(self):
 		if self.worker:
@@ -127,7 +136,7 @@ class TrafficGenerator(QWidget):
 		sleep = 0
 		if self.ui.slider.value():
 			sleep = self.ui.slider.value()/1000.0
-		self.worker = WorkerThread(sleep)
+		self.worker = WorkerThread(self.ui.le_Server.text(), sleep)
 		self.connect(self.worker, SIGNAL('update(int, int)'), self.cb_update)
 		self.worker.start()
 
