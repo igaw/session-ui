@@ -17,7 +17,6 @@
 import os
 import signal
 import sys
-import selinux
 from functools import partial
 
 from PyQt4 import uic
@@ -413,7 +412,11 @@ class Session(QWidget):
 		sys.exit()
 
 def main():
-	print selinux.getcon()
+	try:
+		import selinux
+		print selinux.getcon()
+	except:
+		print "no SELinux available"
 
 	app = QApplication(sys.argv)
 	myapp = Session()
