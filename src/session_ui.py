@@ -364,19 +364,30 @@ class Session(QWidget):
 			print "Exception:"
 			traceback.print_exc()
 
+	def handle_session_create(self, path):
+		print "Session Path %s" % path
+
+		self.session_path = path
+		self.session = dbus.Interface(self.bus.get_object("net.connman", self.session_path),
+							"net.connman.Session")
+		self.set_controls(True)
+
+	def handle_session_create_error(self, e):
+		print "RaiseException raised an exception as expected:"
+		print "\t", str(e)
+
 	def cb_Create(self):
 		try:
 			self.notify = Notification(self.bus, self.notify_path,
 						   self.cb_updateSettings, self.cb_Release)
 			self.notify.add_to_connection(self.bus, self.notify_path)
 
-			self.session_path = self.manager.CreateSession(self.settings, self.notify_path)
-			print "Session Path: ", self.session_path
-
-			self.session = dbus.Interface(self.bus.get_object("net.connman", self.session_path),
-							"net.connman.Session")
-
-			self.set_controls(True)
+			infinite = 2147483647.0 / 1000.0
+			self.manager.CreateSession(self.settings,
+						   self.notify_path,
+						   timeout=infinite,
+						   reply_handler=self.handle_session_create,
+						   error_handler=self.handle_session_create_error)
 		except dbus.DBusException, e:
 			print e.get_dbus_message()
 
