@@ -219,6 +219,7 @@ class Session(QWidget):
 		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
 
 
+		self.session_path = None
 		self.notify = None
 		self.notify_path = "/foo"
 		self.ui.le_SessionName.setText(self.notify_path)
@@ -266,6 +267,10 @@ class Session(QWidget):
 
 	def reset(self):
 		self.settings = {}
+
+		if self.manager and self.session_path:
+			self.manager.DestroySession(self.session_path)
+
 		if self.notify:
 			try:
 				self.notify.remove_from_connection(self.bus, self.notify_path)
@@ -401,8 +406,6 @@ class Session(QWidget):
 
 	def cb_Destroy(self):
 		try:
-			self.manager.DestroySession(self.session_path)
-
 			self.reset()
 		except dbus.DBusException, e:
 			print e.get_dbus_message()
