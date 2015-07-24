@@ -24,7 +24,6 @@ from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, QThread
 from PyQt4.QtGui import *
 
 import PyQt4.Qwt5 as Qwt
-from PyQt4.Qwt5.anynumpy import *
 import socket
 import time
 
@@ -94,87 +93,6 @@ class WorkerThread(QThread):
 
 			self.emit(SIGNAL('update(int, int)'), upload, download)
 
-class TrafficGenerator(QWidget):
-	def __init__(self, parent=None):
-		QWidget.__init__(self, parent)
-
-		ui_class, widget_class = uic.loadUiType(get_resource_path('ui/trafficgenerator.ui'))
-		self.ui = ui_class()
-		self.ui.setupUi(self)
-
-		self.worker = None
-
-		self.x = arange(0, 30, 1)
-		self.y = zeros(len(self.x))
-		self.curve = Qwt.QwtPlotCurve("Some Data")
-		self.curve.attach(self.ui.qwtPlot)
-
-		self.ui.qwtPlot.setAxisTitle(Qwt.QwtPlot.xBottom, "Time (seconds)")
-		self.ui.qwtPlot.setAxisTitle(Qwt.QwtPlot.yLeft, "Bytes")
-
-		self.ui.slider.setRange(0, 1000, 10)
-		self.ui.slider.setValue(50)
-
-		self.connect(self.ui.le_Server, SIGNAL('editingFinished()'), self.cb_Server)
-		self.connect(self.ui.pb_Start, SIGNAL('clicked()'), self.cb_Start)
-		self.connect(self.ui.pb_Stop, SIGNAL('clicked()'), self.cb_Stop)
-		self.connect(self.ui.pb_Close, SIGNAL('clicked()'), self.cb_Close)
-		self.connect(self.ui.slider, SIGNAL('sliderMoved(double)'), self.cb_sleep)
-
-	def cb_Server(self):
-		if not self.worker:
-			return
-
-		self.cb_Stop()
-		self.cb_Start()
-
-	def cb_Start(self):
-		if self.worker:
-			return
-
-		sleep = 0
-		if self.ui.slider.value():
-			sleep = self.ui.slider.value()/1000.0
-		self.worker = WorkerThread(self.ui.le_Server.text(), sleep)
-		self.connect(self.worker, SIGNAL('update(int, int)'), self.cb_update)
-		self.worker.start()
-
-		self.timer = QTimer()
-		self.connect(self.timer, SIGNAL('timeout()'), self.cb_timeout)
-		self.timer.start(1000)
-
-	def cb_Stop(self):
-		if not self.worker:
-			return
-
-		self.timer.stop()
-		self.timer = None
-		self.worker.terminate()
-		self.worker = None
-
-	def cb_Close(self):
-		self.cb_Stop()
-		self.hide()
-
-	def cb_sleep(self, value):
-		if not self.worker:
-			return
-		if value == 0:
-			self.worker.sleep = 0
-		else:
-			self.worker.sleep = value/1000.0
-
-
-	def cb_update(self, upload, download):
-		self.y[-1] += download
-
-	def cb_timeout(self):
-		self.curve.setData(self.x, self.y)
-		self.ui.qwtPlot.replot()
-
-		self.y = concatenate((self.y[1:], self.y[:1]), 1)
-		self.y[-1] = 0
-
 class Notification(dbus.service.Object):
 	def __init__(self, bus, notify_path, cb_settings, cb_release):
 		dbus.service.Object.__init__(self)
@@ -201,8 +119,6 @@ class Session(QWidget):
 		self.ui = ui_class()
 		self.ui.setupUi(self)
 
-		self.connect(self.ui.pb_TrafficGenerator, SIGNAL('clicked()'), self.cb_TrafficGenerator)
-
 		self.connect(self.ui.pb_SessionEnable, SIGNAL('clicked()'), self.cb_SessionEnable)
 		self.connect(self.ui.pb_SessionDisable, SIGNAL('clicked()'), self.cb_SessionDisable)
 
@@ -227,7 +143,6 @@ class Session(QWidget):
 		self.bus = dbus.SystemBus()
 		self.manager = None
 		self.session = None
-		self.traffic_generator = TrafficGenerator()
 
 		try:
 			self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
@@ -314,12 +229,6 @@ class Session(QWidget):
 			self.manager.SetProperty("SessionMode", enable)
 		except dbus.DBusException, e:
 			print e.get_dbus_message()
-
-	def cb_TrafficGenerator(self):
-		if self.traffic_generator.isVisible():
-			self.traffic_generator.hide()
-		else:
-			self.traffic_generator.show()
 
 	def cb_SessionEnable(self):
 		self.set_session_mode(True)
