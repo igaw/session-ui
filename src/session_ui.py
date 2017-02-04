@@ -105,6 +105,10 @@ class Session(QWidget):
             self.cb_AllowedBearers)
         self.ui.le_ConnectionType.editingFinished.connect(
             self.cb_ConnectionType)
+        self.ui.le_AllowedInterface.editingFinished.connect(
+            self.cb_AllowedInterface)
+        self.ui.cbox_SourceIPRRule.stateChanged.connect(
+            self.cb_SourceIPRule)
         self.session_path = None
         self.notify = None
         self.notify_path = "/foo"
@@ -150,6 +154,8 @@ class Session(QWidget):
         self.ui.le_IPv6.setText("")
         self.ui.le_AllowedBearers.setText("*")
         self.ui.le_ConnectionType.setText("any")
+        self.ui.le_AllowedInterface.setText("*")
+        self.ui.cbox_SourceIPRRule.setCheckState(0)
 
     def reset(self):
         self.settings = {}
@@ -188,6 +194,12 @@ class Session(QWidget):
     def cb_ConnectionType(self):
         value = str(self.ui.le_ConnectionType.displayText())
         self.session_change('ConnectionType', value)
+
+    def cb_AllowedInterface(self):
+        pass
+
+    def cb_SourceIPRule(self, state):
+        pass
 
     def cb_Release(self):
         self.reset()
@@ -244,6 +256,13 @@ class Session(QWidget):
                 print("	  %s = %s" % (key, val))
 
                 self.settings[key] = val
+
+                if key == 'SourceIPRule':
+                    state = 0
+                    if val:
+                        state = 2
+                    self.ui.cbox_SourceIPRRule.setCheckState(state)
+                    return
 
                 lineEdit = getattr(self.ui, 'le_' + key)
                 lineEdit.setText(str(val))
