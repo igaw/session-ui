@@ -19,13 +19,9 @@ import signal
 import sys
 from functools import partial
 
-from PyQt4 import uic
-from PyQt4.QtCore import SIGNAL, SLOT, QObject, QTimer, QThread
-from PyQt4.QtGui import *
-
-import PyQt4.Qwt5 as Qwt
-import socket
-import time
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtWidgets import QWidget, QApplication
 
 import distutils.sysconfig
 
@@ -53,7 +49,7 @@ def extract_list(list):
 
 def extract_values(values):
 	val = ""
-	for key in values.keys():
+	for key in list(values.keys()):
 		val += " " + key + "="
 		if key in [ "PrefixLength" ]:
 			val += "%s" % (int(values[key]))
@@ -64,35 +60,6 @@ def extract_values(values):
 				val += str(values[key])
 	return val.strip()
 
-class WorkerThread(QThread):
-	def __init__(self, server, sleep = 0.05):
-		QThread.__init__(self)
-		self.server = server
-		self.sleep = sleep
-
-	def run(self):
-		HOST, PORT = self.server, 9999
-		data = 1000*"x"
-		upload = 0
-		download = 0
-
-		while True:
-			print self.sleep
-			time.sleep(self.sleep)
-
-			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			try:
-				upload = len(data)
-				sock.connect((HOST, PORT))
-				sock.sendall(data + "\n")
-
-				received = sock.recv(1024)
-				download = len(received)
-			finally:
-				sock.close()
-
-			self.emit(SIGNAL('update(int, int)'), upload, download)
-
 class Notification(dbus.service.Object):
 	def __init__(self, bus, notify_path, cb_settings, cb_release):
 		dbus.service.Object.__init__(self)
@@ -102,13 +69,13 @@ class Notification(dbus.service.Object):
 	@dbus.service.method("net.connman.Notification",
 				in_signature='', out_signature='')
 	def Release(self):
-		print "Release"
+		print("Release")
 		self.cb_release()
 
 	@dbus.service.method("net.connman.Notification",
 				in_signature='a{sv}', out_signature='')
 	def Update(self, settings):
-		print "Update called"
+		print("Update called")
 		self.cb_settings(settings)
 
 class Session(QWidget):
@@ -119,22 +86,15 @@ class Session(QWidget):
 		self.ui = ui_class()
 		self.ui.setupUi(self)
 
-		self.connect(self.ui.pb_SessionEnable, SIGNAL('clicked()'), self.cb_SessionEnable)
-		self.connect(self.ui.pb_SessionDisable, SIGNAL('clicked()'), self.cb_SessionDisable)
-
-		self.connect(self.ui.pb_Create, SIGNAL('clicked()'), self.cb_Create)
-		self.connect(self.ui.pb_Destroy, SIGNAL('clicked()'), self.cb_Destroy)
-		self.connect(self.ui.pb_Connect, SIGNAL('clicked()'), self.cb_Connect)
-		self.connect(self.ui.pb_Disconnect, SIGNAL('clicked()'), self.cb_Disconnect)
-
-		self.connect(self.ui.pb_Quit, SIGNAL('clicked()'), self.cb_Quit)
-
-		self.connect(self.ui.le_SessionName, SIGNAL('editingFinished()'), self.cb_SessionName)
-
-		self.connect(self.ui.le_AllowedBearers, SIGNAL('editingFinished()'), self.cb_AllowedBearers)
-		self.connect(self.ui.le_ConnectionType, SIGNAL('editingFinished()'), self.cb_ConnectionType)
-
-
+		self.ui.pb_SessionEnable.clicked.connect(self.cb_SessionEnable)
+		self.ui.pb_SessionDisable.clicked.connect(self.cb_SessionDisable)
+		self.ui.pb_Create.clicked.connect(self.cb_Create)
+		self.ui.pb_Destroy.clicked.connect(self.cb_Destroy)
+		self.ui.pb_Disconnect.clicked.connect(self.cb_Disconnect)
+		self.ui.pb_Quit.clicked.connect(self.cb_Quit)
+		self.ui.le_SessionName.editingFinished.connect(self.cb_SessionName)
+		self.ui.le_AllowedBearers.editingFinished.connect(self.cb_AllowedBearers)
+		self.ui.le_ConnectionType.editingFinished.connect(self.cb_ConnectionType)
 		self.session_path = None
 		self.notify = None
 		self.notify_path = "/foo"
@@ -146,22 +106,22 @@ class Session(QWidget):
 
 		try:
 			self.bus.watch_name_owner('net.connman', self.connman_name_owner_changed)
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 			exit(1)
 
 	def connman_name_owner_changed(self, proxy):
 		try:
 			if proxy:
-				print "ConnMan appeared on D-Bus ", str(proxy)
+				print("ConnMan appeared on D-Bus ", str(proxy))
 				self.manager = dbus.Interface(self.bus.get_object("net.connman", "/"),
 							      "net.connman.Manager")
 			else:
 				self.manager = None
-				print "ConnMan disappeared on D-Bus"
+				print("ConnMan disappeared on D-Bus")
 			self.reset()
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 			exit(1)
 
 	def set_controls(self, enable):
@@ -225,10 +185,12 @@ class Session(QWidget):
 		self.notify_path = str(self.ui.le_SessionName.displayText())
 
 	def set_session_mode(self, enable):
+		if not self.manager:
+			return
 		try:
 			self.manager.SetProperty("SessionMode", enable)
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 
 	def cb_SessionEnable(self):
 		self.set_session_mode(True)
@@ -266,20 +228,20 @@ class Session(QWidget):
 
 	def cb_updateSettings(self, settings):
 		try:
-			for key in settings.keys():
+			for key in list(settings.keys()):
 				val = self.convert_type_from_dbus(key, settings)
-				print "	  %s = %s" % (key, val)
+				print("	  %s = %s" % (key, val))
 
 				self.settings[key] = val
 
 				lineEdit = getattr(self.ui, 'le_' + key)
 				lineEdit.setText(str(val))
 		except:
-			print "Exception:"
+			print("Exception:")
 			traceback.print_exc()
 
 	def handle_session_create(self, path):
-		print "Session Path %s" % path
+		print("Session Path %s" % path)
 
 		self.session_path = path
 		self.session = dbus.Interface(self.bus.get_object("net.connman", self.session_path),
@@ -287,10 +249,12 @@ class Session(QWidget):
 		self.set_controls(True)
 
 	def handle_session_create_error(self, e):
-		print "RaiseException raised an exception as expected:"
-		print "\t", str(e)
+		print("RaiseException raised an exception as expected:")
+		print("\t", str(e))
 
 	def cb_Create(self):
+		if not self.manager:
+			return
 		try:
 			self.notify = Notification(self.bus, self.notify_path,
 						   self.cb_updateSettings, self.cb_Release)
@@ -302,8 +266,8 @@ class Session(QWidget):
 						   timeout=infinite,
 						   reply_handler=self.handle_session_create,
 						   error_handler=self.handle_session_create_error)
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 
 			if e.get_dbus_name() in ['net.connman.Error.AlreadyExists']:
 				return
@@ -316,20 +280,24 @@ class Session(QWidget):
 	def cb_Destroy(self):
 		try:
 			self.reset()
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 
 	def cb_Connect(self):
+		if not self.session:
+			return
 		try:
 			self.session.Connect()
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 
 	def cb_Disconnect(self):
+		if not self.session:
+			return
 		try:
 			self.session.Disconnect()
-		except dbus.DBusException, e:
-			print e.get_dbus_message()
+		except dbus.DBusException as e:
+			print(e.get_dbus_message())
 
 	def cb_Quit(self):
 		sys.exit()
@@ -337,9 +305,9 @@ class Session(QWidget):
 def main():
 	try:
 		import selinux
-		print selinux.getcon()
+		print(selinux.getcon())
 	except:
-		print "no SELinux available"
+		print("no SELinux available")
 
 	app = QApplication(sys.argv)
 	myapp = Session()

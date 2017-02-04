@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>427</width>
-    <height>562</height>
+    <width>373</width>
+    <height>502</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,39 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="verticalSpacing">
+      <number>6</number>
+     </property>
+     <item row="10" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>SourceIPRule</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="2">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>AllowedInterfaces</string>
+       </property>
+      </widget>
+     </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -30,7 +63,7 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="label_16">
        <property name="text">
         <string>Session Name</string>
@@ -51,7 +84,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="5" column="2">
       <widget class="QLineEdit" name="le_IPv6">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
@@ -68,7 +101,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="3" column="2">
       <widget class="QLineEdit" name="le_Interface">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
@@ -85,6 +118,9 @@
        </property>
       </widget>
      </item>
+     <item row="12" column="2">
+      <widget class="QLineEdit" name="le_SessionName"/>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -92,36 +128,10 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="1">
+     <item row="8" column="2">
       <widget class="QLineEdit" name="le_ConnectionType"/>
      </item>
-     <item row="9" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Minimum</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>10</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="10" column="1">
-      <widget class="QLineEdit" name="le_SessionName"/>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLineEdit" name="le_AllowedBearers">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
+     <item row="1" column="2">
       <widget class="QLineEdit" name="le_Name">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
@@ -131,7 +141,24 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="7" column="2">
+      <widget class="QLineEdit" name="le_AllowedBearers">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QLineEdit" name="le_Bearer">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="2">
       <spacer name="verticalSpacer_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -147,8 +174,18 @@
        </property>
       </spacer>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="le_Bearer">
+     <item row="4" column="2">
+      <widget class="QLineEdit" name="le_IPv4">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLineEdit" name="le_State">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
@@ -164,43 +201,34 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="le_IPv4">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
+     <item row="9" column="2">
+      <widget class="QLineEdit" name="le_AllowedInterfaces"/>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="le_State">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
+     <item row="10" column="2">
+      <widget class="QCheckBox" name="cbox_SourceIPRRule">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4"/>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
