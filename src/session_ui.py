@@ -98,6 +98,7 @@ class Session(QWidget):
         self.ui.pb_SessionDisable.clicked.connect(self.cb_SessionDisable)
         self.ui.pb_Create.clicked.connect(self.cb_Create)
         self.ui.pb_Destroy.clicked.connect(self.cb_Destroy)
+        self.ui.pb_Connect.clicked.connect(self.cb_Connect)
         self.ui.pb_Disconnect.clicked.connect(self.cb_Disconnect)
         self.ui.pb_Quit.clicked.connect(self.cb_Quit)
         self.ui.le_SessionName.editingFinished.connect(self.cb_SessionName)
