@@ -263,7 +263,7 @@ class Session(QWidget):
                     if val:
                         state = 2
                     self.ui.cbox_SourceIPRRule.setCheckState(state)
-                    return
+                    continue
 
                 lineEdit = getattr(self.ui, 'le_' + key)
                 lineEdit.setText(str(val))
