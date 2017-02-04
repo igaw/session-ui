@@ -30,7 +30,7 @@ import traceback
 import dbus
 import dbus.service
 import dbus.mainloop.qt
-dbus.mainloop.qt.DBusQtMainLoop(set_as_default=True)
+from dbus.mainloop.pyqt5 import DBusQtMainLoop
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -325,6 +325,7 @@ def main():
     except:
         print("no SELinux available")
 
+    DBusQtMainLoop(set_as_default = True)
     app = QApplication(sys.argv)
     myapp = Session()
     myapp.show()
